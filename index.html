@@ -1,0 +1,720 @@
+<title>Пиксель-Парк</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Press+Start+2P&family=Unbounded:wght@600;800&display=swap">
+<style>
+/* Layout: neon arcade lobby (single dark look on purpose) → three game cabinets, each with its own palette inside */
+:root{
+  --deep:#0b0720; --night:#130d2c; --panel:#1b1440; --line:#33296a;
+  --ink:#f5f0ff; --muted:#a99fd6;
+  --pink:#ff4f9a; --pink-d:#a3245e; --cyan:#3ee8f0; --sun:#ffd447; --mint:#6cf7c4;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-pixel:"Press Start 2P","Courier New",monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;background:var(--deep);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.px{font-family:var(--f-pixel);font-size:10px;letter-spacing:.08em;line-height:1.6}
+
+/* ---------- HUB ---------- */
+.hub{min-height:100%;
+  background:
+    radial-gradient(900px 420px at 85% -10%, rgba(255,79,154,.22), transparent 60%),
+    radial-gradient(700px 380px at 0% 10%, rgba(62,232,240,.14), transparent 60%),
+    var(--deep);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:28px 40px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.hero{display:flex;flex-direction:column;gap:14px;padding-top:12px}
+.hero .px{color:var(--cyan)}
+.hero h1{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,9vw,92px);line-height:.95;letter-spacing:-.03em;margin:0;text-wrap:balance;
+  text-shadow:0 0 22px rgba(255,79,154,.55)}
+.hero h1 span{color:var(--pink)}
+.lede{margin:0;max-width:56ch;color:var(--muted);font-size:clamp(16px,2.2vw,19px)}
+.coin{display:inline-flex;align-items:center;gap:10px;color:var(--sun)}
+.coin i{width:10px;height:10px;background:var(--sun);box-shadow:0 0 10px var(--sun);animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:#5a4aa8}
+.pv{display:block;width:100%;aspect-ratio:16/10;image-rendering:pixelated;max-width:100%}
+.card-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-family:var(--f-pixel);font-size:8px;letter-spacing:.06em;padding:6px 8px;border-radius:6px;background:#2a2160;color:var(--muted)}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:22px;line-height:1.15;margin:0}
+.card p{margin:0}
+.fit{font-size:14px;color:var(--muted)}
+.fit b{color:var(--ink);font-weight:600}
+.card-foot{margin-top:auto;padding-top:8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.best{font-family:var(--f-pixel);font-size:9px;color:var(--sun)}
+.play{font-family:var(--f-display);font-weight:600;font-size:15px;text-decoration:none;color:#1a0b24;background:var(--pink);padding:11px 20px;border-radius:12px;box-shadow:0 4px 0 var(--pink-d);transition:transform .1s,box-shadow .1s}
+.play:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-d)}
+.c-quiz .play{background:var(--sun);box-shadow:0 4px 0 #a5841a}
+.c-kitchen .play{background:var(--mint);box-shadow:0 4px 0 #2f9a76}
+
+.qprev{aspect-ratio:16/10;max-width:100%;background:linear-gradient(160deg,#5b1fa8,#ff4f9a 120%);display:flex;flex-direction:column;justify-content:center;gap:10px;padding:18px}
+.qprev .qq{background:#fff;color:#1a1033;border-radius:10px;padding:10px 12px;font-weight:600;font-size:14px;line-height:1.3}
+.qprev .qo{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qprev .qo span{border-radius:8px;padding:7px 9px;font-size:12px;font-weight:600;color:#1a1033}
+
+.pitch{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center;background:#1a1340;border:1px dashed #4b3d97;border-radius:18px;padding:22px}
+.pitch h3{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0 0 6px}
+.pitch p{margin:0;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font-size:14px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--night)}
+@media (max-width:640px){.pitch{grid-template-columns:1fr}}
+.foot{color:#6f66a3;font-size:13px;text-align:center}
+
+/* ---------- PLAY VIEW ---------- */
+.play-view{height:100%;display:flex;flex-direction:column;background:var(--deep)}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--line);background:var(--night)}
+.back{text-decoration:none;font-weight:600;font-size:14px;padding:8px 12px;border-radius:10px;background:#251c55}
+.bar strong{font-family:var(--f-display);font-weight:600;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--f-pixel);font-size:9px;padding:7px 9px;border-radius:8px;background:#251c55;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip b{color:var(--sun);font-weight:400}
+.hearts{color:var(--pink)}
+.hearts .off{color:#3d3270}
+.stage{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding-block:16px 20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.btn{font-family:var(--f-display);font-weight:600;font-size:16px;color:#1a0b24;background:var(--pink);padding:13px 26px;border-radius:12px;box-shadow:0 4px 0 var(--pink-d);transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-d)}
+.btn.alt{background:#2a2160;color:var(--ink);box-shadow:0 4px 0 #120c30}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(11,7,32,.66);padding:16px;z-index:5}
+.ov-card{text-align:center;max-width:360px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.ov-card h3{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,5vw,34px);margin:0;line-height:1.1;text-wrap:balance}
+.ov-card p{margin:0;color:#d8d0ff}
+.ov-card .small{font-size:13px;color:var(--muted)}
+
+/* race */
+.race{width:100%;max-width:960px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.screen{position:relative;width:min(100%,calc((100vh - 220px)*1.6));width:min(100%,calc((100dvh - 220px)*1.6));min-width:min(100%,280px);aspect-ratio:16/10;max-width:100%;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px var(--line),0 0 44px rgba(255,79,154,.28)}
+.screen canvas{display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+.pads{display:flex;gap:12px;align-items:center;width:100%;max-width:560px}
+.pad{flex:1;height:68px;border-radius:16px;background:#221a50;border:2px solid var(--line);font-size:26px;color:var(--cyan);touch-action:none;user-select:none;-webkit-user-select:none}
+.pad.on{background:#33287a;border-color:var(--cyan)}
+.pads .hint{font-size:12px;color:var(--muted);text-align:center;flex:0 1 140px}
+
+/* quiz */
+.quiz{width:100%;max-width:660px;position:relative}
+.q-card{position:relative;overflow:hidden;background:linear-gradient(165deg,#2a1470,#1b1440 60%);border:1px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:16px;min-height:420px}
+.q-top{display:flex;justify-content:space-between;align-items:center;color:var(--cyan)}
+.q-top .pts{color:var(--sun)}
+.q-timer{height:10px;border-radius:99px;background:#120c30;overflow:hidden}
+.q-timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--mint),var(--sun),var(--pink));transform-origin:left}
+.q-text{font-family:var(--f-display);font-weight:600;font-size:clamp(20px,4.4vw,28px);line-height:1.2;margin:4px 0;text-wrap:balance}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.q-opts{grid-template-columns:1fr}}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border-radius:14px;color:#1a1033;font-weight:600;font-size:16px;line-height:1.25;box-shadow:0 4px 0 rgba(0,0,0,.35);transition:transform .12s,opacity .2s}
+.opt:hover:not(:disabled){transform:translateY(-2px)}
+.opt .let{flex:none;width:30px;height:30px;border-radius:8px;background:rgba(26,16,51,.18);display:grid;place-items:center;font-family:var(--f-pixel);font-size:10px}
+.o0{background:var(--pink)}.o1{background:var(--cyan)}.o2{background:var(--sun)}.o3{background:var(--mint)}
+.opt:disabled{cursor:default}
+.opt.dim{opacity:.32}
+.opt.ok{outline:4px solid #fff;outline-offset:2px;opacity:1}
+.opt.bad{opacity:.55;text-decoration:line-through}
+.q-fact{margin:0;background:#120c30;border-radius:12px;padding:12px 14px;color:#d8d0ff;font-size:15px}
+.q-fact b{color:var(--mint)}
+.q-next{align-self:flex-end}
+.q-intro,.q-end{align-items:center;text-align:center;justify-content:center}
+.q-big{font-family:var(--f-display);font-weight:800;font-size:clamp(34px,8vw,56px);line-height:1;margin:0;text-shadow:0 0 20px rgba(255,212,71,.45)}
+.q-big span{color:var(--sun)}
+.badge{font-family:var(--f-pixel);font-size:8px;line-height:1.7;padding:8px 10px;border-radius:8px;background:#120c30;color:var(--mint);max-width:340px}
+.score-big{font-family:var(--f-pixel);font-size:clamp(22px,6vw,34px);color:var(--sun)}
+.confetti{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
+
+/* kitchen */
+.kitchen{width:100%;max-width:860px;display:flex;flex-direction:column;gap:14px;position:relative}
+.k-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:14px;align-items:stretch}
+@media (max-width:640px){.k-top{grid-template-columns:1fr}.k-scene{order:-1}}
+.ticket{background:#fff8ea;color:#2b1a12;border-radius:6px 6px 0 0;padding:14px 14px 18px;display:flex;flex-direction:column;gap:10px;position:relative;
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat,radial-gradient(circle at 6px 0,transparent 5px,#000 5.5px) bottom/12px 8px repeat-x;
+  mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat,radial-gradient(circle at 6px 0,transparent 5px,#000 5.5px) bottom/12px 8px repeat-x}
+.t-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px dashed #e5cfae;padding-bottom:8px}
+.t-head .px{font-size:9px;color:#b8432f}
+.t-guest{font-weight:600;font-size:15px}
+.t-hint{font-size:12px;color:#8a6a52;margin:0}
+.t-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;gap:4px}
+.t-list li{display:flex;align-items:center;gap:10px;padding:4px 8px;border-radius:8px;font-weight:500;font-size:15px}
+.t-list li .n{font-family:var(--f-pixel);font-size:8px;color:#b39577;width:16px}
+.t-list li canvas{width:60px;height:20px;image-rendering:pixelated;flex:none}
+.t-list li.done{opacity:.4;text-decoration:line-through}
+.t-list li.next{background:#ffe7a3}
+.pat{height:8px;border-radius:99px;background:#f0dcc0;overflow:hidden;margin-top:auto}
+.pat i{display:block;height:100%;background:#4cc38a;transform-origin:left;transition:background .3s}
+.pat i.low{background:#e8423f}
+.k-scene{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px var(--line)}
+.k-scene canvas{display:block;width:100%;aspect-ratio:4/3;max-width:100%;image-rendering:pixelated}
+.pop{position:absolute;left:50%;top:22%;transform:translateX(-50%);font-family:var(--f-pixel);font-size:clamp(12px,3vw,18px);color:#1d7a4f;text-shadow:2px 2px 0 #fff;pointer-events:none;white-space:nowrap;opacity:0}
+.pop.bad{color:#d1342f}
+.pop.go{animation:pop 1s ease-out}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}15%{opacity:1;transform:translate(-50%,0) scale(1.1)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-26px)}}
+.ings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ing{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px 10px;border-radius:14px;background:#221a50;border:2px solid var(--line);box-shadow:0 4px 0 #120c30;transition:transform .08s,border-color .15s;touch-action:manipulation}
+.ing:hover{border-color:var(--mint)}
+.ing:active{transform:translateY(3px);box-shadow:0 1px 0 #120c30}
+.ing canvas{width:min(100%,96px);height:auto;aspect-ratio:3/1;image-rendering:pixelated}
+.ing span{font-weight:600;font-size:15px}
+.k-actions{display:flex;justify-content:center}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
+<div id="hub" class="hub">
+  <div class="wrap">
+    <header class="hero">
+      <span class="px coin"><i></i>ВСТАВЬТЕ МОНЕТКУ · 3 ИГРЫ</span>
+      <h1>Пиксель<span>-</span>Парк</h1>
+      <p class="lede">Три мини-игры, которые открываются по ссылке на телефоне и компьютере. Без скачивания и регистрации: нажали «Играть» и поехали.</p>
+    </header>
+
+    <div class="cards">
+      <article class="card c-race">
+        <canvas class="pv" id="pvRace" width="320" height="200" aria-label="Кадр из игры Неоновая трасса"></canvas>
+        <div class="card-body">
+          <div class="tags"><span class="tag">ГОНКА</span><span class="tag">ВИД ИЗ КАБИНЫ</span><span class="tag">80-Е</span></div>
+          <h2>Неоновая трасса</h2>
+          <p>Ночная гонка в стиле ретро-аркады. Объезжайте машины, ловите монеты, скорость растёт с каждой секундой.</p>
+          <p class="fit"><b>Подойдёт:</b> подарок геймеру, конкурс на рекорд, промо-игра с призом</p>
+          <div class="card-foot"><span class="best" data-best="race">РЕКОРД: —</span><a class="play" href="#race">Играть</a></div>
+        </div>
+      </article>
+
+      <article class="card c-quiz">
+        <div class="qprev" aria-hidden="true">
+          <div class="qq">Сколько сердец у осьминога?</div>
+          <div class="qo"><span style="background:var(--pink)">Одно</span><span style="background:var(--cyan)">Три</span><span style="background:var(--sun)">Два</span><span style="background:var(--mint)">Восемь</span></div>
+        </div>
+        <div class="card-body">
+          <div class="tags"><span class="tag">КВИЗ</span><span class="tag">НА ВРЕМЯ</span><span class="tag">ДЛЯ КОМПАНИИ</span></div>
+          <h2>Квиз-Пати</h2>
+          <p>Восемь вопросов, 15 секунд на ответ. Чем быстрее отвечаете, тем больше очков, а в конце звание и конфетти.</p>
+          <p class="fit"><b>Подойдёт:</b> корпоратив, день рождения, викторина о компании или о паре</p>
+          <div class="card-foot"><span class="best" data-best="quiz">РЕКОРД: —</span><a class="play" href="#quiz">Играть</a></div>
+        </div>
+      </article>
+
+      <article class="card c-kitchen">
+        <canvas class="pv" id="pvKitchen" width="200" height="150" style="aspect-ratio:4/3" aria-label="Кадр из игры Бургер-аврал"></canvas>
+        <div class="card-body">
+          <div class="tags"><span class="tag">КУХНЯ</span><span class="tag">НА СКОРОСТЬ</span><span class="tag">СЕМЕЙНАЯ</span></div>
+          <h2>Бургер-аврал</h2>
+          <p>Гости ждут заказы. Собирайте бургеры слой за слоем, пока у гостей не кончилось терпение.</p>
+          <p class="fit"><b>Подойдёт:</b> игра для детей, промо для кафе, тимбилдинг «кто быстрее»</p>
+          <div class="card-foot"><span class="best" data-best="kitchen">РЕКОРД: —</span><a class="play" href="#kitchen">Играть</a></div>
+        </div>
+      </article>
+    </div>
+
+    <section class="pitch">
+      <div>
+        <h3>Такую же игру, но про вас</h3>
+        <p>Любую игру отсюда можно переделать под ваш повод: героем станет именинник, вопросы будут о вашей компании, а в финале откроется поздравление или промокод.</p>
+      </div>
+      <div class="chips"><span>Ваши имена и фото</span><span>Свои вопросы</span><span>Логотип и цвета</span><span>Финальный сюрприз</span><span>Таблица рекордов</span></div>
+    </section>
+    <p class="foot">HTML5 · работает на Android, iPhone, планшетах и компьютерах</p>
+  </div>
+</div>
+
+<section id="view" class="play-view" hidden>
+  <div class="bar">
+    <a class="back" href="#">← В парк</a>
+    <strong id="vTitle"></strong>
+    <div class="hud" id="hud"></div>
+  </div>
+  <div class="stage" id="stage"></div>
+</section>
+
+<script>
+(function(){
+"use strict";
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const store={
+  get(k){try{return +localStorage.getItem("pp_"+k)||0}catch(e){return 0}},
+  set(k,v){try{localStorage.setItem("pp_"+k,String(v))}catch(e){}}
+};
+function R(ctx,c,x,y,w,h){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h)));}
+function hex(c){return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];}
+function lerpC(a,b,k){const A=hex(a),B=hex(b);return "rgb("+A.map((v,i)=>Math.round(v+(B[i]-v)*k)).join(",")+")";}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function hearts(n){return "♥".repeat(Math.max(0,n))+'<span class="off">'+"♥".repeat(Math.max(0,3-n))+"</span>";}
+const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* =========================================================
+   1. НЕОНОВАЯ ТРАССА — pseudo-3D racer, 320×200 pixels
+   ========================================================= */
+const RW=320,RH=200,HOR=88,DEPTH=RH-HOR,K=2400;
+const LANES=[-0.66,0,0.66];
+const CAR_COLORS=[["#ff4f9a","#a3245e"],["#ffd447","#a5841a"],["#6cf7c4","#2f9a76"],["#ff8a3d","#a8501a"],["#b48cff","#6a46b8"]];
+const STARS=Array.from({length:48},(_,i)=>[Math.floor((i*73.13+11)%320),Math.floor((i*29.7+3)%74),i%3]);
+
+function drawCar(ctx,x,yb,w,col,player){
+  const h=w*0.52,L=x-w/2;
+  R(ctx,"rgba(0,0,0,.45)",L-w*0.05,yb-h*0.1,w*1.1,h*0.12);
+  R(ctx,"#07040f",L+w*0.03,yb-h*0.32,w*0.18,h*0.32);
+  R(ctx,"#07040f",x+w*0.29,yb-h*0.32,w*0.18,h*0.32);
+  R(ctx,col[0],L,yb-h*0.8,w,h*0.52);
+  R(ctx,col[1],L,yb-h*0.38,w,h*0.1);
+  R(ctx,col[1],L+w*0.1,yb-h*1.06,w*0.8,h*0.3);
+  R(ctx,"#120b2c",L+w*0.16,yb-h*1.0,w*0.68,h*0.2);
+  R(ctx,"#ff2d55",L+w*0.05,yb-h*0.68,w*0.2,h*0.13);
+  R(ctx,"#ff2d55",x+w*0.25,yb-h*0.68,w*0.2,h*0.13);
+  R(ctx,"#ffe0ea",L+w*0.07,yb-h*0.66,w*0.06,h*0.05);
+  R(ctx,"#f5f0ff",x-w*0.11,yb-h*0.58,w*0.22,h*0.1);
+  if(player){
+    R(ctx,"rgba(62,232,240,.18)",L-w*0.1,yb-h*0.02,w*1.2,h*0.06);
+  }
+}
+function drawCoin(ctx,x,y,r,t){
+  const w=Math.max(1,Math.abs(Math.cos(t*5+x*0.03))*r);
+  R(ctx,"#a5841a",x-w,y-r,w*2,r*2);
+  R(ctx,"#ffd447",x-w*0.78,y-r*0.82,w*1.56,r*1.64);
+  R(ctx,"#fff6c2",x-w*0.3,y-r*0.6,Math.max(1,w*0.28),r*0.9);
+}
+function rowCenter(s,sc,half){return 160+s.curve*(1-sc)*(1-sc)*110-s.x*half;}
+
+function raceFrame(ctx,s){
+  ctx.save();
+  if(s.shake>0)ctx.translate(Math.round((Math.random()-.5)*7*s.shake),Math.round((Math.random()-.5)*4*s.shake));
+  const sky=ctx.createLinearGradient(0,0,0,HOR);
+  sky.addColorStop(0,"#0b0624");sky.addColorStop(.55,"#3a1468");sky.addColorStop(1,"#c2338a");
+  ctx.fillStyle=sky;ctx.fillRect(-6,-6,RW+12,HOR+6);
+  for(const [x,y,k] of STARS){
+    if(k===0&&((Math.floor(s.t*2.5)+x)%5===0))continue;
+    R(ctx,k===2?"#ffd447":"#efe8ff",x,y,1,1);
+  }
+  /* striped sun */
+  const sx=160-s.curve*36,sy=HOR-22,r=31;
+  for(let yy=-r;yy<=r;yy++){
+    const y=sy+yy; if(y>=HOR)break;
+    if(yy>2&&(yy%6)<Math.min(5,yy/5))continue;
+    const w=Math.sqrt(r*r-yy*yy);
+    R(ctx,lerpC("#ffe24a","#ff3d8b",(yy+r)/(2*r)),sx-w,y,w*2,1);
+  }
+  /* mountains */
+  for(let x=0;x<RW;x+=2){const u=x+s.bg*0.45;const h=11+6*Math.sin(u*0.045)+4*Math.sin(u*0.11+1);R(ctx,"#4a1d78",x,HOR-h,2,h);}
+  for(let x=0;x<RW;x+=2){const u=x+s.bg;const h=4+6*Math.abs(Math.sin(u*0.028))+3*Math.sin(u*0.09);R(ctx,"#200e45",x,HOR-h,2,Math.max(1,h));}
+  R(ctx,"#ff4f9a",0,HOR,RW,1);
+  /* road */
+  for(let y=HOR+1;y<RH;y++){
+    const dy=y-HOR,sc=dy/DEPTH,z=K/dy,half=150*sc,cx=rowCenter(s,sc,half);
+    const seg=Math.floor((s.pos+z)/55)&1;
+    R(ctx,seg?"#150834":"#1d0c42",0,y,RW,1);
+    if(Math.floor((s.pos+z)/55)%6===0)R(ctx,"#3b1a74",0,y,RW,1);
+    const rw=Math.max(1,half*0.09);
+    R(ctx,seg?"#ff4f9a":"#f5f0ff",cx-half-rw,y,half*2+rw*2,1);
+    R(ctx,seg?"#2a2052":"#31265f",cx-half,y,half*2,1);
+    if(seg){const lw=Math.max(1,half*0.025);R(ctx,"#ffd447",cx-half/3-lw/2,y,lw,1);R(ctx,"#ffd447",cx+half/3-lw/2,y,lw,1);}
+  }
+  /* sprites far → near */
+  const list=[];
+  for(const c of s.cars){const rel=c.z-s.pos;if(rel>22&&rel<1300)list.push([rel,0,c]);}
+  for(const c of s.coins){if(c.got)continue;const rel=c.z-s.pos;if(rel>22&&rel<1300)list.push([rel,1,c]);}
+  list.sort((a,b)=>b[0]-a[0]);
+  for(const [rel,kind,o] of list){
+    const dy=K/rel,y=HOR+dy,sc=dy/DEPTH,half=150*sc,x=rowCenter(s,sc,half)+o.lane*half;
+    if(kind===0)drawCar(ctx,x,y,half*0.5,o.c,false);
+    else drawCoin(ctx,x,y-half*0.2,Math.max(1.5,half*0.1),s.t);
+  }
+  /* player */
+  if(!(s.inv>0&&Math.floor(s.t*12)%2))drawCar(ctx,160+s.steer*5,RH-3,76,["#3ee8f0","#1b8f9a"],true);
+  if(s.speed>520&&s.running){
+    ctx.globalAlpha=.5;
+    for(let i=0;i<4;i++){const yy=HOR+20+((s.t*900+i*53)%92);R(ctx,"#f5f0ff",4+i*3,yy,1,6);R(ctx,"#f5f0ff",RW-6-i*3,yy+20,1,6);}
+    ctx.globalAlpha=1;
+  }
+  if(s.msg>0){
+    ctx.font='8px "Press Start 2P", monospace';ctx.textAlign="center";
+    ctx.fillStyle="#ffd447";ctx.fillText(s.msgText,160,HOR+34-(0.6-s.msg)*20);
+  }
+  ctx.restore();
+}
+function mkCar(s,ahead){const c=CAR_COLORS[Math.random()*CAR_COLORS.length|0];return{z:s.pos+ahead,lane:LANES[Math.random()*3|0],v:170+Math.random()*170,c};}
+function mkCoin(s,ahead){return{z:s.pos+ahead,lane:LANES[Math.random()*3|0],got:false};}
+function newRace(){
+  const s={pos:0,x:0,speed:0,max:560,curve:0,bg:0,t:0,lives:3,inv:0,shake:0,score:0,coinsGot:0,steer:0,steerIn:0,cars:[],coins:[],running:false,msg:0,msgText:""};
+  for(let i=0;i<5;i++)s.cars.push(mkCar(s,420+i*360));
+  for(let i=0;i<4;i++)s.coins.push(mkCoin(s,300+i*420));
+  return s;
+}
+
+function startRace(stage,hud){
+  stage.innerHTML=`<div class="race">
+    <div class="screen"><canvas id="rc" width="${RW}" height="${RH}"></canvas><div class="ov" id="rov"></div></div>
+    <div class="pads"><button class="pad" id="padL" aria-label="Влево">◀</button><div class="hint">Клавиши ← → или кнопки</div><button class="pad" id="padR" aria-label="Вправо">▶</button></div>
+  </div>`;
+  hud.innerHTML=`<span class="chip"><b id="hS">0</b> ОЧК</span><span class="chip"><b id="hV">0</b> КМ/Ч</span><span class="chip hearts" id="hL">${hearts(3)}</span>`;
+  const cv=$("#rc"),ctx=cv.getContext("2d"),ov=$("#rov"),hS=$("#hS"),hV=$("#hV"),hL=$("#hL");
+  let s=newRace(),raf=0,last=performance.now(),keys={l:0,r:0},pads={l:0,r:0};
+  s.pos=600;s.curve=0.4;
+
+  function showStart(){
+    ov.hidden=false;
+    ov.innerHTML=`<div class="ov-card"><span class="px" style="color:var(--cyan)">ТРАССА · 1986</span><h3>Неоновая трасса</h3><p>Объезжайте машины и собирайте монеты. Три жизни, скорость растёт.</p><button class="btn" id="go">Старт</button><p class="small">← → на клавиатуре или кнопки под экраном</p></div>`;
+    $("#go").onclick=go;
+  }
+  function go(){s=newRace();s.running=true;ov.hidden=true;hL.innerHTML=hearts(3);}
+  function over(){
+    s.running=false;
+    const sc=Math.round(s.score),best=Math.max(sc,store.get("race"));store.set("race",best);
+    ov.hidden=false;
+    ov.innerHTML=`<div class="ov-card"><span class="px" style="color:var(--pink)">ФИНИШ</span><h3>${sc} очков</h3><p>Монет собрано: ${s.coinsGot} · Рекорд: ${best}</p><div class="btns"><button class="btn" id="again">Ещё раз</button><a class="btn alt" href="#" style="text-decoration:none">В парк</a></div></div>`;
+    $("#again").onclick=go;
+  }
+  function update(dt){
+    s.t+=dt;
+    if(s.shake>0)s.shake=Math.max(0,s.shake-dt*2.5);
+    if(s.msg>0)s.msg-=dt;
+    const input=(keys.r||pads.r?1:0)-(keys.l||pads.l?1:0);
+    s.steerIn=input;s.steer+=(input-s.steer)*Math.min(1,dt*10);
+    if(!s.running){s.pos+=60*dt;s.curve=Math.sin(s.pos*0.0009)*0.6;return;}
+    s.max=Math.min(980,560+s.t*6);
+    const off=Math.abs(s.x)>1.02;
+    if(off){s.speed=Math.max(160,s.speed-520*dt);s.shake=Math.max(s.shake,.25);}
+    else s.speed+=(s.max-s.speed)*Math.min(1,dt*0.7);
+    s.pos+=s.speed*dt;
+    s.curve=Math.sin(s.pos*0.0009)*1.0+Math.sin(s.pos*0.00031+1)*0.5;
+    s.bg+=s.curve*s.speed*dt*0.03;
+    s.x+=input*dt*1.9*(0.5+s.speed/1400);
+    s.x-=s.curve*dt*(s.speed/900)*0.85;
+    s.x=Math.max(-1.6,Math.min(1.6,s.x));
+    if(s.inv>0)s.inv-=dt;
+    s.score+=s.speed*dt*0.02;
+    for(const c of s.cars){
+      c.z+=c.v*dt;const rel=c.z-s.pos;
+      if(rel<-40||rel>2600){Object.assign(c,mkCar(s,1300+Math.random()*900));continue;}
+      if(s.inv<=0&&rel>14&&rel<42&&Math.abs(c.lane-s.x)<0.42){
+        s.lives--;s.inv=1.6;s.speed*=0.35;s.shake=1;c.z=s.pos-60;hL.innerHTML=hearts(s.lives);
+        if(s.lives<=0){over();return;}
+      }
+    }
+    for(const c of s.coins){
+      const rel=c.z-s.pos;
+      if(rel<-40){Object.assign(c,mkCoin(s,900+Math.random()*800));continue;}
+      if(!c.got&&rel>10&&rel<42&&Math.abs(c.lane-s.x)<0.4){c.got=true;s.score+=100;s.coinsGot++;s.msg=.6;s.msgText="+100";}
+    }
+  }
+  function loop(now){
+    const dt=Math.min(0.05,(now-last)/1000);last=now;
+    update(dt);raceFrame(ctx,s);
+    hS.textContent=Math.round(s.score);hV.textContent=Math.round(s.speed*0.32);
+    raf=requestAnimationFrame(loop);
+  }
+  const kd=e=>{if(e.key==="ArrowLeft"||e.key==="a"||e.key==="ф"){keys.l=1;e.preventDefault();}if(e.key==="ArrowRight"||e.key==="d"||e.key==="в"){keys.r=1;e.preventDefault();}if((e.key===" "||e.key==="Enter")&&!s.running&&!ov.hidden){const b=$("#go")||$("#again");if(b){e.preventDefault();b.click();}}};
+  const ku=e=>{if(e.key==="ArrowLeft"||e.key==="a"||e.key==="ф")keys.l=0;if(e.key==="ArrowRight"||e.key==="d"||e.key==="в")keys.r=0;};
+  addEventListener("keydown",kd);addEventListener("keyup",ku);
+  function bindPad(el,side){
+    const on=e=>{e.preventDefault();pads[side]=1;el.classList.add("on");};
+    const offf=()=>{pads[side]=0;el.classList.remove("on");};
+    el.addEventListener("pointerdown",on);["pointerup","pointerleave","pointercancel"].forEach(t=>el.addEventListener(t,offf));
+    el.addEventListener("contextmenu",e=>e.preventDefault());
+  }
+  bindPad($("#padL"),"l");bindPad($("#padR"),"r");
+  cv.addEventListener("pointerdown",e=>{const r=cv.getBoundingClientRect();const side=e.clientX-r.left<r.width/2?"l":"r";pads[side]=1;cv.setPointerCapture(e.pointerId);cv._side=side;});
+  const cvUp=()=>{if(cv._side){pads[cv._side]=0;cv._side=null;}};
+  cv.addEventListener("pointerup",cvUp);cv.addEventListener("pointercancel",cvUp);
+  showStart();raf=requestAnimationFrame(loop);
+  return{stop(){cancelAnimationFrame(raf);removeEventListener("keydown",kd);removeEventListener("keyup",ku);}};
+}
+
+/* =========================================================
+   2. КВИЗ-ПАТИ
+   ========================================================= */
+const QUESTIONS=[
+  ["Сколько сердец у осьминога?",["Три","Одно","Два","Восемь"],"Два сердца гонят кровь через жабры, третье — по всему телу."],
+  ["Какая планета самая большая в Солнечной системе?",["Юпитер","Сатурн","Нептун","Земля"],"В Юпитер поместилось бы больше тысячи таких планет, как Земля."],
+  ["Из чего делают попкорн?",["Из кукурузы","Из риса","Из гороха","Из пшеницы"],"Зерно лопается, когда вода внутри превращается в пар."],
+  ["Сколько клавиш у обычного пианино?",["88","64","72","100"],"52 белые и 36 чёрных — вместе ровно 88."],
+  ["Какой океан самый большой?",["Тихий","Атлантический","Индийский","Северный Ледовитый"],"Тихий океан больше, чем вся суша Земли вместе взятая."],
+  ["Как раньше называли фрукт киви?",["Китайский крыжовник","Мохнатая слива","Южный лимон","Зелёный инжир"],"Имя «киви» ему дали в Новой Зеландии в честь местной птицы."],
+  ["Сколько минут в сутках?",["1440","1200","1000","2400"],"24 часа по 60 минут — 1440."],
+  ["Какой город называют Северной столицей?",["Санкт-Петербург","Мурманск","Архангельск","Великий Новгород"],"Петербург был столицей России больше двухсот лет."]
+];
+const QTIME=15;
+function confetti(host){
+  if(reduced)return;
+  const c=document.createElement("canvas");c.className="confetti";host.appendChild(c);
+  const r=host.getBoundingClientRect();c.width=r.width;c.height=r.height;
+  const ctx=c.getContext("2d"),cols=["#ff4f9a","#3ee8f0","#ffd447","#6cf7c4","#ffffff"];
+  const P=Array.from({length:140},()=>({x:r.width/2,y:r.height*0.35,vx:(Math.random()-.5)*12,vy:-Math.random()*11-3,s:4+Math.random()*5,c:cols[Math.random()*5|0],a:Math.random()*6}));
+  let f=0;
+  (function tick(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const p of P){p.vy+=0.32;p.x+=p.vx;p.y+=p.vy;p.vx*=0.99;p.a+=0.2;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.s,p.s*Math.abs(Math.cos(p.a)));}
+    if(++f<160&&c.isConnected)requestAnimationFrame(tick);else c.remove();
+  })();
+}
+function startQuiz(stage,hud){
+  stage.innerHTML=`<div class="quiz"><div class="q-card" id="qc"></div></div>`;
+  hud.innerHTML=`<span class="chip"><b id="qS">0</b> ОЧК</span><span class="chip"><b id="qN">0/${QUESTIONS.length}</b></span>`;
+  const card=$("#qc"),qS=$("#qS"),qN=$("#qN");
+  let i=0,score=0,right=0,raf=0,t0=0,locked=false,qs=[];
+  function intro(){
+    card.className="q-card q-intro";
+    card.innerHTML=`<span class="px" style="color:var(--cyan)">ВЕЧЕРИНКА НАЧИНАЕТСЯ</span>
+      <h3 class="q-big">Квиз<span>-</span>Пати</h3>
+      <p style="margin:0;color:#d8d0ff;max-width:40ch">${QUESTIONS.length} вопросов · ${QTIME} секунд на ответ · за скорость дают бонус</p>
+      <button class="btn" id="qGo" style="background:var(--sun);box-shadow:0 4px 0 #a5841a">Начать</button>
+      <span class="badge">ДЕМО: ВОПРОСЫ ЛЕГКО ЗАМЕНИТЬ НА ВАШИ — О КОМПАНИИ, ИМЕНИННИКЕ ИЛИ ПАРЕ</span>`;
+    $("#qGo").onclick=begin;
+  }
+  function begin(){i=0;score=0;right=0;qs=shuffle(QUESTIONS.slice());qS.textContent="0";ask();}
+  function ask(){
+    locked=false;
+    const [text,opts,fact]=qs[i],order=shuffle([0,1,2,3]);
+    qN.textContent=(i+1)+"/"+qs.length;
+    card.className="q-card";
+    card.innerHTML=`<div class="q-top"><span class="px">ВОПРОС ${i+1} ИЗ ${qs.length}</span><span class="px pts">${score}</span></div>
+      <div class="q-timer"><i id="qT"></i></div>
+      <h3 class="q-text">${text}</h3>
+      <div class="q-opts">${order.map((k,j)=>`<button class="opt o${j}" data-k="${k}"><span class="let">${"АБВГ"[j]}</span><span>${opts[k]}</span></button>`).join("")}</div>
+      <p class="q-fact" id="qF" hidden></p>
+      <button class="btn q-next" id="qX" hidden>Дальше →</button>`;
+    card.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.k,b));
+    $("#qX").onclick=()=>{i++;i<qs.length?ask():end();};
+    t0=performance.now();
+    const bar=$("#qT");
+    cancelAnimationFrame(raf);
+    (function tick(now){
+      if(locked)return;
+      const left=Math.max(0,QTIME-(now-t0)/1000);
+      bar.style.transform="scaleX("+(left/QTIME)+")";
+      if(left<=0){answer(-1,null);return;}
+      raf=requestAnimationFrame(tick);
+    })(t0);
+  }
+  function answer(k,btn){
+    if(locked)return;locked=true;cancelAnimationFrame(raf);
+    const left=Math.max(0,QTIME-(performance.now()-t0)/1000);
+    const ok=k===0;
+    card.querySelectorAll(".opt").forEach(b=>{b.disabled=true;const kk=+b.dataset.k;if(kk===0)b.classList.add("ok");else if(b===btn)b.classList.add("bad");else b.classList.add("dim");});
+    let head;
+    if(ok){const pts=100+Math.round(left*10);score+=pts;right++;head=`<b>Верно! +${pts}</b> `;}
+    else head=k<0?`<b style="color:var(--pink)">Время вышло.</b> `:`<b style="color:var(--pink)">Мимо!</b> `;
+    qS.textContent=score;card.querySelector(".pts").textContent=score;
+    const f=$("#qF");f.innerHTML=head+qs[i][2];f.hidden=false;
+    const x=$("#qX");x.hidden=false;x.textContent=i+1<qs.length?"Дальше →":"Итоги →";x.focus({preventScroll:true});
+  }
+  function end(){
+    const best=Math.max(score,store.get("quiz"));store.set("quiz",best);
+    const title=right===qs.length?"Гений вечеринки":right>=6?"Главный эрудит":right>=4?"Крепкий знаток":"Есть куда расти";
+    card.className="q-card q-end";
+    card.innerHTML=`<span class="px" style="color:var(--cyan)">ИТОГИ</span>
+      <h3 class="q-big">${title}</h3>
+      <div class="score-big">${score}</div>
+      <p style="margin:0;color:#d8d0ff">Правильных ответов: ${right} из ${qs.length} · Рекорд: ${best}</p>
+      <div class="btns"><button class="btn" id="qR" style="background:var(--sun);box-shadow:0 4px 0 #a5841a">Ещё раз</button><a class="btn alt" href="#" style="text-decoration:none">В парк</a></div>`;
+    $("#qR").onclick=begin;
+    if(right>=4)confetti(card);
+  }
+  intro();
+  return{stop(){locked=true;cancelAnimationFrame(raf);}};
+}
+
+/* =========================================================
+   3. БУРГЕР-АВРАЛ — 200×150 pixel kitchen
+   ========================================================= */
+const ING={patty:"Котлета",cheese:"Сыр",lettuce:"Салат",tomato:"Томат",onion:"Лук",bacon:"Бекон"};
+const ING_KEYS=Object.keys(ING);
+const GUESTS=["Таня","Дима","Бабушка Нина","Шеф Олег","Курьер Ваня","Лиза","Капитан Миша","Соседка Света","Мэр города","Тренер Паша"];
+const SESAME=[[-26,-13],[-9,-14],[9,-13],[26,-11],[-36,-8],[17,-8],[-2,-9],[35,-6],[-18,-6]];
+function drawLayer(ctx,t,cx,y,w){
+  const L=cx-w/2,k=w/104;
+  switch(t){
+    case "bunB":R(ctx,"#b8732f",L+2,y-3,w-4,3);R(ctx,"#e3a157",L,y-10,w,7);R(ctx,"#f6c886",L+3,y-10,w-6,1);return 10;
+    case "patty":R(ctx,"#3d1d0e",L-1,y-9,w+2,9);R(ctx,"#6e3a1d",L,y-8,w,6);for(let i=4;i<w-4;i+=7)R(ctx,"#94562f",L+i,y-7,3,1);for(let i=8;i<w-4;i+=11)R(ctx,"#4a240f",L+i,y-4,2,1);return 9;
+    case "cheese":R(ctx,"#ffc12e",L-4,y-4,w+8,4);R(ctx,"#ffe187",L-3,y-4,w+6,1);for(let i=6;i<w;i+=18)R(ctx,"#ffc12e",L+i,y,4,Math.max(2,3*k));return 4;
+    case "lettuce":R(ctx,"#3aa848",L-6,y-5,w+12,5);for(let i=0;i<w+12;i+=6)R(ctx,"#71dc75",L-6+i,y-6,3,1);for(let i=0;i<w+12;i+=5)R(ctx,"#2a8638",L-6+i,y,3,1);return 5;
+    case "tomato":R(ctx,"#b92b28",L+3,y-5,w-6,5);R(ctx,"#ef4a43",L+4,y-4,w-8,3);for(let i=0;i<w-14;i+=9)R(ctx,"#ffb3a8",L+7+i,y-3,2,1);return 5;
+    case "onion":R(ctx,"#efe3ff",L+1,y-4,w-2,4);R(ctx,"#b98ee6",L+1,y-4,w-2,1);for(let i=0;i<w;i+=10)R(ctx,"#b98ee6",L+1+i,y-4,1,4);return 4;
+    case "bacon":R(ctx,"#a2382a",L-3,y-4,w+6,4);R(ctx,"#f1b29d",L-3,y-3,w+6,1);for(let i=0;i<w+6;i+=8)R(ctx,"#a2382a",L-3+i,y-5,4,1);return 4;
+    case "bunT":{
+      for(let r=0;r<16;r++){const rw=w*(0.6+0.4*Math.sqrt(r/15));R(ctx,r<3?"#f0b366":"#e3a157",cx-rw/2,y-16+r,rw,1);}
+      R(ctx,"#f6cd8e",cx-w*0.3,y-14,w*0.22,2);
+      R(ctx,"#b8732f",L,y-1,w,1);
+      for(const [dx,dy] of SESAME)R(ctx,"#fff3cf",cx+dx*k,y+dy,Math.max(1,3*k),Math.max(1,2*k));
+      return 16;}
+  }
+  return 0;
+}
+function kitchenScene(ctx,stack,shakeT,t){
+  R(ctx,"#ffe6c7",0,0,200,104);
+  for(let y=0;y<104;y+=12){R(ctx,"#f6d2a8",0,y,200,1);for(let x=((y/12)%2)*12;x<200;x+=24)R(ctx,"#f6d2a8",x,y,1,12);}
+  /* neon sign */
+  R(ctx,"#2a1556",10,10,66,24);R(ctx,"#ff4f9a",10,10,66,1);R(ctx,"#ff4f9a",10,33,66,1);
+  ctx.font='6px "Press Start 2P", monospace';ctx.textAlign="center";
+  ctx.fillStyle=(Math.floor(t*1.5)%7===0)?"#7a2a5a":"#ff6fae";ctx.fillText("БУРГЕРЫ",43,25);
+  /* shelf with jars */
+  R(ctx,"#b8794a",128,32,62,3);
+  [["#e8423f",134],["#ffc12e",150],["#6cbf5a",166],["#9b6ad8",180]].forEach(([c,x],j)=>{R(ctx,"#e9f3f6",x-1,20-j%2*2,10,12+j%2*2);R(ctx,c,x,24-j%2*2,8,7+j%2*2);R(ctx,"#8a5a3a",x-1,18-j%2*2,10,2);});
+  /* counter */
+  R(ctx,"#ff8a6b",0,104,200,2);R(ctx,"#e85d4a",0,106,200,5);R(ctx,"#a83a2a",0,111,200,39);
+  for(let x=8;x<200;x+=16)R(ctx,"#b8432f",x,114,6,36);
+  const cx=100+(shakeT>0?Math.sin(shakeT*70)*3:0);
+  let y=118;
+  R(ctx,"#aebdcf",cx-58,y+1,116,3);R(ctx,"#e8eef6",cx-64,y-2,128,4);R(ctx,"#ffffff",cx-56,y-2,112,1);
+  y-=2;
+  y-=drawLayer(ctx,"bunB",cx,y,104);
+  for(const l of stack){
+    const e=1-Math.pow(1-Math.min(1,l.a),3);
+    const off=-(1-e)*90;
+    y-=drawLayer(ctx,l.t,cx,y+off,104);
+  }
+}
+function iconCanvas(t,w,h,lw){
+  const c=document.createElement("canvas");c.width=w;c.height=h;
+  drawLayer(c.getContext("2d"),t,w/2,h-4,lw);return c;
+}
+function startKitchen(stage,hud){
+  stage.innerHTML=`<div class="kitchen" id="kRoot">
+    <div class="k-top">
+      <div class="ticket" id="kTicket">
+        <div class="t-head"><span class="px">ЗАКАЗ №<span id="kNo">1</span></span><span class="t-guest" id="kGuest"></span></div>
+        <p class="t-hint">Собирайте снизу вверх: первый слой ложится на булку</p>
+        <ol class="t-list" id="kList"></ol>
+        <div class="pat"><i id="kPat"></i></div>
+      </div>
+      <div class="k-scene"><canvas id="kc" width="200" height="150"></canvas><div class="pop" id="kPop"></div><div class="ov" id="kov"></div></div>
+    </div>
+    <div class="ings" id="kIngs"></div>
+    <div class="k-actions"><button class="btn alt" id="kReset">Сбросить бургер</button></div>
+  </div>`;
+  hud.innerHTML=`<span class="chip">⏱ <b id="kT">75</b></span><span class="chip"><b id="kC">0</b> МОНЕТ</span><span class="chip hearts" id="kH">${hearts(3)}</span>`;
+  const cv=$("#kc"),ctx=cv.getContext("2d"),ov=$("#kov"),pop=$("#kPop"),list=$("#kList"),patEl=$("#kPat"),ticket=$("#kTicket");
+  const elT=$("#kT"),elC=$("#kC"),elH=$("#kH");
+  const ings=$("#kIngs");
+  ING_KEYS.forEach(k=>{const b=document.createElement("button");b.className="ing";b.dataset.k=k;b.appendChild(iconCanvas(k,72,24,56));const s=document.createElement("span");s.textContent=ING[k];b.appendChild(s);b.onclick=()=>tap(k);ings.appendChild(b);});
+  let st,raf=0,last=performance.now(),timers=[];
+  function fresh(){return{time:75,coins:0,hearts:3,served:0,order:[],stack:[],pat:1,patMax:1,running:false,busy:false,shake:0,t:0,no:0};}
+  st=fresh();
+  st.stack=[{t:"lettuce",a:1},{t:"patty",a:1},{t:"cheese",a:1},{t:"tomato",a:1}];
+  function say(text,bad){pop.textContent=text;pop.className="pop"+(bad?" bad":"");void pop.offsetWidth;pop.classList.add("go");}
+  function newOrder(){
+    const n=2+Math.min(3,Math.floor(st.served/2));
+    const o=[];while(o.length<n){const k=ING_KEYS[Math.random()*ING_KEYS.length|0];if(o[o.length-1]!==k)o.push(k);}
+    st.order=o;st.stack=[];st.no++;
+    st.patMax=Math.max(8,17-st.served*0.6);st.pat=st.patMax;
+    $("#kNo").textContent=st.no;$("#kGuest").textContent=GUESTS[(st.no-1)%GUESTS.length];
+    renderTicket();
+  }
+  function renderTicket(){
+    const done=st.stack.filter(l=>l.t!=="bunT").length;
+    list.innerHTML="";
+    st.order.forEach((k,j)=>{
+      const li=document.createElement("li");
+      if(j<done)li.className="done";else if(j===done)li.className="next";
+      li.innerHTML=`<span class="n">${j+1}</span>`;
+      li.appendChild(iconCanvas(k,60,20,44));
+      const s=document.createElement("span");s.textContent=ING[k];li.appendChild(s);
+      list.appendChild(li);
+    });
+  }
+  function tap(k){
+    if(!st.running||st.busy)return;
+    const idx=st.stack.length;
+    if(st.order[idx]===k){
+      st.stack.push({t:k,a:0});renderTicket();
+      if(st.stack.length===st.order.length){
+        st.busy=true;
+        timers.push(setTimeout(()=>{
+          st.stack.push({t:"bunT",a:0});
+          const gain=10*st.order.length+Math.round(st.pat/st.patMax*20);
+          st.coins+=gain;st.served++;elC.textContent=st.coins;say("+"+gain+" МОНЕТ");
+          timers.push(setTimeout(()=>{st.busy=false;if(st.running)newOrder();},850));
+        },220));
+      }
+    }else{
+      say("НЕ ТОТ СЛОЙ!",true);st.stack=[];st.pat=Math.max(0.5,st.pat-2);st.shake=0.35;
+      ticket.classList.remove("shake");void ticket.offsetWidth;ticket.classList.add("shake");
+      renderTicket();
+    }
+  }
+  function intro(){
+    ov.hidden=false;
+    ov.innerHTML=`<div class="ov-card"><span class="px" style="color:var(--mint)">СМЕНА НАЧИНАЕТСЯ</span><h3>Бургер-аврал</h3><p>75 секунд, три жизни. Собирайте заказ по чеку, пока гость не ушёл.</p><button class="btn" id="kGo" style="background:var(--mint);box-shadow:0 4px 0 #2f9a76">Открыть кафе</button></div>`;
+    $("#kGo").onclick=go;
+  }
+  function go(){
+    st=fresh();st.running=true;ov.hidden=true;
+    elC.textContent="0";elH.innerHTML=hearts(3);newOrder();
+  }
+  function end(){
+    st.running=false;timers.forEach(clearTimeout);timers=[];
+    const best=Math.max(st.coins,store.get("kitchen"));store.set("kitchen",best);
+    ov.hidden=false;
+    ov.innerHTML=`<div class="ov-card"><span class="px" style="color:var(--mint)">СМЕНА ОКОНЧЕНА</span><h3>${st.coins} монет</h3><p>Накормлено гостей: ${st.served} · Рекорд: ${best}</p><div class="btns"><button class="btn" id="kAg" style="background:var(--mint);box-shadow:0 4px 0 #2f9a76">Ещё смена</button><a class="btn alt" href="#" style="text-decoration:none">В парк</a></div></div>`;
+    $("#kAg").onclick=go;
+  }
+  $("#kReset").onclick=()=>{if(st.running&&!st.busy){st.stack=[];renderTicket();}};
+  function loop(now){
+    const dt=Math.min(0.05,(now-last)/1000);last=now;st.t+=dt;
+    for(const l of st.stack)if(l.a<1)l.a+=dt*4;
+    if(st.shake>0)st.shake-=dt;
+    if(st.running){
+      st.time-=dt;
+      if(!st.busy)st.pat-=dt;
+      if(st.pat<=0){
+        st.hearts--;elH.innerHTML=hearts(st.hearts);say("ГОСТЬ УШЁЛ",true);
+        if(st.hearts<=0){end();}else newOrder();
+      }
+      if(st.running&&st.time<=0){st.time=0;end();}
+      elT.textContent=Math.ceil(st.time);
+      const p=Math.max(0,st.pat/st.patMax);patEl.style.transform="scaleX("+p+")";patEl.classList.toggle("low",p<0.3);
+    }
+    kitchenScene(ctx,st.stack,st.shake,st.t);
+    raf=requestAnimationFrame(loop);
+  }
+  /* demo order on the ticket behind the intro */
+  st.order=["lettuce","patty","cheese","tomato"];st.no=17;$("#kNo").textContent=17;$("#kGuest").textContent="Шеф Олег";renderTicket();
+  intro();raf=requestAnimationFrame(loop);
+  return{stop(){cancelAnimationFrame(raf);timers.forEach(clearTimeout);}};
+}
+
+/* ---------- router & hub ---------- */
+const GAMES={
+  race:{title:"Неоновая трасса",start:startRace},
+  quiz:{title:"Квиз-Пати",start:startQuiz},
+  kitchen:{title:"Бургер-аврал",start:startKitchen}
+};
+const hub=$("#hub"),view=$("#view"),stage=$("#stage"),hud=$("#hud"),vTitle=$("#vTitle");
+let cur=null;
+function updateBests(){
+  document.querySelectorAll("[data-best]").forEach(el=>{const v=store.get(el.dataset.best);el.textContent="РЕКОРД: "+(v?v:"—");});
+}
+function drawPreviews(){
+  const s=newRace();s.pos=2140;s.x=0.18;s.curve=0.55;s.bg=40;s.t=1.3;s.steer=0.4;s.speed=0;
+  s.cars=[{z:s.pos+170,lane:-0.66,c:CAR_COLORS[0]},{z:s.pos+330,lane:0.66,c:CAR_COLORS[1]},{z:s.pos+700,lane:0,c:CAR_COLORS[4]}];
+  s.coins=[{z:s.pos+240,lane:0,got:false},{z:s.pos+520,lane:-0.66,got:false}];
+  raceFrame($("#pvRace").getContext("2d"),s);
+  kitchenScene($("#pvKitchen").getContext("2d"),[{t:"lettuce",a:1},{t:"patty",a:1},{t:"cheese",a:1},{t:"tomato",a:1},{t:"bacon",a:1},{t:"bunT",a:1}],0,0.4);
+}
+function route(){
+  const h=location.hash.slice(1);
+  if(cur){cur.stop();cur=null;}
+  stage.innerHTML="";hud.innerHTML="";
+  if(GAMES[h]){
+    hub.hidden=true;view.hidden=false;vTitle.textContent=GAMES[h].title;
+    cur=GAMES[h].start(stage,hud);window.scrollTo(0,0);
+  }else{
+    view.hidden=true;hub.hidden=false;updateBests();
+  }
+}
+addEventListener("hashchange",route);
+drawPreviews();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawPreviews);
+route();
+})();
+</script>
